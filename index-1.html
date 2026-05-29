@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Noxify Shop</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0f1824;--card:#162032;--card2:#1a2840;--blue:#3b82f6;--blue2:#2563eb;
+  --text:#e2e8f0;--sub:#64748b;--border:#1e3050;--green:#22c55e;
+}
+html,body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
+.hdr{background:var(--card);padding:12px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:200}
+.hdr-back{width:34px;height:34px;border:none;background:var(--card2);border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text);font-size:18px;flex-shrink:0}
+.hdr-title{font-size:17px;font-weight:700;flex:1}
+.hdr-sub{font-size:11px;color:var(--sub);font-weight:400}
+.bnav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;z-index:200;padding-bottom:env(safe-area-inset-bottom)}
+.bni{flex:1;padding:8px 2px 6px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;color:var(--sub);font-size:9px;border:none;background:none;transition:.15s}
+.bni.on{color:var(--blue)}
+.bni .ic{font-size:21px;line-height:1}
+.main{padding-bottom:66px}
+.banner{margin:12px 12px 0;background:linear-gradient(135deg,#1a3a5c,#0d1f36);border-radius:16px;padding:18px;position:relative;overflow:hidden;border:1px solid var(--border)}
+.banner::after{content:'';position:absolute;right:-30px;top:-30px;width:130px;height:130px;background:var(--blue);opacity:.07;border-radius:50%}
+.banner-title{font-size:22px;font-weight:800}
+.banner-sub{color:var(--sub);font-size:13px;margin-top:3px}
+.banner-pills{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.pill{background:rgba(59,130,246,.15);color:var(--blue);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;border:1px solid rgba(59,130,246,.3)}
+.sec{padding:16px 12px 6px}
+.sec-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--sub);margin-bottom:10px}
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 12px}
+.cat-card{background:var(--card);border-radius:14px;padding:16px 14px;cursor:pointer;border:1.5px solid var(--border);transition:.12s}
+.cat-card:active{transform:scale(.96)}
+.cat-card .em{font-size:30px;margin-bottom:8px}
+.cat-card .cn{font-size:14px;font-weight:700}
+.cat-card .cs{font-size:11px;color:var(--sub);margin-top:2px}
+.chips{display:flex;gap:8px;padding:0 12px;overflow-x:auto;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{padding:9px 16px;border-radius:24px;border:1.5px solid var(--border);background:var(--card);font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;color:var(--sub);transition:.12s;flex-shrink:0}
+.chip.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.list{padding:0 12px;display:flex;flex-direction:column;gap:8px}
+.li{background:var(--card);border-radius:13px;padding:13px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;border:1.5px solid var(--border);transition:.12s}
+.li:active{transform:scale(.98)}
+.li .fl{font-size:26px;line-height:1;flex-shrink:0}
+.li .inf{flex:1;min-width:0}
+.li .inf .nm{font-size:14px;font-weight:700}
+.li .inf .sm{font-size:11px;color:var(--sub);margin-top:2px}
+.li .rhs{text-align:right;flex-shrink:0}
+.li .rhs .pr{color:var(--blue);font-weight:700;font-size:14px}
+.li .rhs .st{font-size:10px;color:var(--sub);margin-top:2px}
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 12px}
+.pbtn{background:var(--card);border:1.5px solid var(--border);border-radius:12px;padding:11px 6px;text-align:center;cursor:pointer;transition:.12s}
+.pbtn:active{transform:scale(.96)}
+.pbtn.on{background:var(--blue);border-color:var(--blue)}
+.pbtn .pd{font-size:13px;font-weight:700}
+.pbtn .pp{font-size:11px;color:var(--sub);margin-top:2px}
+.pbtn.on .pp{color:rgba(255,255,255,.65)}
+.qty-wrap{padding:0 12px}
+.qty-row{display:flex;align-items:center;gap:10px}
+.qbtn{width:42px;height:42px;background:var(--card);border:1.5px solid var(--border);border-radius:11px;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text);font-weight:300;flex-shrink:0}
+.qinp{flex:1;background:var(--card);border:1.5px solid var(--border);border-radius:11px;height:42px;text-align:center;color:var(--text);font-size:15px;font-weight:700;outline:none}
+.qpres{display:flex;gap:6px;margin-top:8px}
+.qp{flex:1;background:var(--card2);border:1.5px solid var(--border);border-radius:8px;padding:5px 2px;text-align:center;font-size:12px;font-weight:600;cursor:pointer;color:var(--sub);transition:.12s}
+.qp.on{color:var(--blue);border-color:var(--blue);background:rgba(59,130,246,.08)}
+.pbox{margin:14px 12px 0;background:var(--card2);border-radius:14px;padding:14px;border:1px solid var(--border)}
+.prow{display:flex;justify-content:space-between;align-items:center;padding:4px 0}
+.plbl{color:var(--sub);font-size:13px}
+.pval{font-size:13px}
+.ptot{font-size:23px;font-weight:800;color:var(--blue)}
+.psep{height:1px;background:var(--border);margin:8px 0}
+.avail{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--green)}
+.buybtn{margin:14px 12px 0;background:var(--blue);border:none;border-radius:14px;padding:15px;width:calc(100% - 24px);color:#fff;font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:.12s}
+.buybtn:disabled{opacity:.35;cursor:not-allowed}
+.buybtn:not(:disabled):active{transform:scale(.98);background:var(--blue2)}
+.vcard{background:var(--card);border-radius:14px;padding:14px;border:1.5px solid var(--border);cursor:pointer;display:flex;align-items:center;gap:12px;transition:.12s}
+.vcard:active{transform:scale(.98)}
+.vic{font-size:28px;flex-shrink:0}
+.vinfo{flex:1;min-width:0}
+.vn{font-size:14px;font-weight:700}
+.vd{font-size:11px;color:var(--sub);margin-top:2px}
+.vpr{font-weight:700;font-size:15px;color:var(--blue);flex-shrink:0}
+.disc-ic{width:42px;height:42px;background:#5865f2;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.empty{text-align:center;padding:60px 20px;color:var(--sub)}
+.empty .ei{font-size:52px;margin-bottom:12px}
+.empty .et{font-size:14px}
+.ldr{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:12px;color:var(--sub);font-size:13px}
+.spin{width:34px;height:34px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.toast{position:fixed;bottom:76px;left:50%;transform:translateX(-50%) translateY(12px);background:#1e293b;color:var(--text);padding:10px 18px;border-radius:10px;font-size:13px;opacity:0;transition:.25s;pointer-events:none;z-index:999;white-space:nowrap;border:1px solid var(--border)}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<div class="hdr" id="hdr">
+  <button class="hdr-back" id="backBtn" onclick="goBack()" style="display:none">‹</button>
+  <div><div class="hdr-title" id="hdrTitle">🖤 Noxify Shop</div><div class="hdr-sub" id="hdrSub"></div></div>
+</div>
+
+<div class="main" id="main"></div>
+
+<div class="bnav">
+  <button class="bni on" id="nav-home"    onclick="navTo('home')">   <span class="ic">🏠</span>Главная</button>
+  <button class="bni"    id="nav-proxy"   onclick="navTo('proxy')">  <span class="ic">🌐</span>Прокси</button>
+  <button class="bni"    id="nav-numbers" onclick="navTo('numbers')"><span class="ic">📱</span>Номера</button>
+  <button class="bni"    id="nav-verif"   onclick="navTo('verif')">  <span class="ic">✅</span>Вериф.</button>
+  <button class="bni"    id="nav-discord" onclick="navTo('discord')"><span class="ic">💬</span>Discord</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const tg = window.Telegram.WebApp;
+tg.ready(); tg.expand();
+
+// ════ КОНФИГ ═══════════════════════════════════
+// Замени на URL твоего сервера где запущен бот
+const API_URL = window.location.origin + "/api/stock";
+
+// ════ STATE ════════════════════════════════════
+const S = { tab:'home', stack:[], ptype:null, country:null, price:null, days:30, qty:1 };
+let STOCK = null; // данные из API
+
+const PTYPES = [
+  {k:'ipv4_shared',l:'IPv4 Shared',i:'🔵'},
+  {k:'ipv4',       l:'IPv4',       i:'🟢'},
+  {k:'mtproto',    l:'MTproto',    i:'✈️'},
+  {k:'ipv6',       l:'IPv6',       i:'🔷'},
+];
+const PERIODS = [{d:3,l:'3 дня'},{d:7,l:'7 дней'},{d:14,l:'14 дней'},{d:30,l:'30 дней'},{d:60,l:'60 дней'},{d:90,l:'90 дней'}];
+const MULT    = {3:.15,7:.3,14:.55,30:1,60:1.7,90:2.3};
+const FLAGS   = {Россия:'🇷🇺',США:'🇺🇸',Украина:'🇺🇦',Казахстан:'🇰🇿',Германия:'🇩🇪',Франция:'🇫🇷',Великобритания:'🇬🇧',Нидерланды:'🇳🇱',Канада:'🇨🇦',Австралия:'🇦🇺',Турция:'🇹🇷',Польша:'🇵🇱'};
+const VINFO   = {fragment:{i:'🔷',d:'Верификация Fragment'},cryptobot:{i:'🤖',d:'CryptoBot'},bybit:{i:'🟡',d:'Bybit KYC'},tg_wallet:{i:'💎',d:'TG Крипто-кошелёк'},binance:{i:'🟠',d:'Binance KYC'}};
+const VNAMES  = {fragment:'Fragment',cryptobot:'CryptoBot',bybit:'Bybit',tg_wallet:'Крипто кошелёк TG',binance:'Binance'};
+
+// ════ ЗАГРУЗКА ДАННЫХ ══════════════════════════
+async function loadStock() {
+  try {
+    const res = await fetch(API_URL);
+    STOCK = await res.json();
+  } catch(e) {
+    // fallback — пустые данные
+    STOCK = { proxy:{}, numbers:[], verifs:[], discord:[] };
+  }
+}
+
+// ════ RENDER ═══════════════════════════════════
+const M = document.getElementById('main');
+function r(html){ M.innerHTML = html; }
+function flag(c){ return FLAGS[c]||'🌍'; }
+function setHdr(t,s=''){ document.getElementById('hdrTitle').textContent=t; document.getElementById('hdrSub').textContent=s; }
+function loader(){ return `<div class="ldr"><div class="spin"></div>Загрузка...</div>`; }
+function empty(i,t){ return `<div class="empty"><div class="ei">${i}</div><div class="et">${t}</div></div>`; }
+
+// ════ НАВИГАЦИЯ ════════════════════════════════
+function navTo(tab){
+  document.querySelectorAll('.bni').forEach(n=>n.classList.remove('on'));
+  const el=document.getElementById('nav-'+tab);
+  if(el) el.classList.add('on');
+  S.tab=tab; S.stack=[]; S.ptype=null; S.country=null; S.price=null; S.days=30; S.qty=1;
+  document.getElementById('backBtn').style.display='none';
+  P[tab]();
+}
+
+function push(fn){ S.stack.push(fn); document.getElementById('backBtn').style.display='flex'; fn(); }
+
+function goBack(){
+  S.stack.pop();
+  if(!S.stack.length) document.getElementById('backBtn').style.display='none';
+  if(S.stack.length) S.stack[S.stack.length-1]();
+  else P[S.tab]();
+}
+
+// ════ СТРАНИЦЫ ═════════════════════════════════
+const P = {
+  home(){
+    setHdr('🖤 Noxify Shop');
+    const pd = STOCK?.proxy || {};
+    const proxyCount  = Object.values(pd).flat().reduce((a,c)=>a+c.n,0);
+    const numberCount = (STOCK?.numbers||[]).reduce((a,c)=>a+c.n,0);
+    const discordCount= (STOCK?.discord||[]).length;
+    r(`<div class="banner">
+        <div class="banner-title">Noxify Shop</div>
+        <div class="banner-sub">Прокси · Номера · Верификации · Discord</div>
+        <div class="banner-pills"><span class="pill">⚡ Мгновенная выдача</span><span class="pill">🌍 Много стран</span><span class="pill">🎧 Поддержка 24/7</span></div>
+      </div>
+      <div class="sec"><div class="sec-title">Каталог</div></div>
+      <div class="cat-grid">
+        <div class="cat-card" onclick="navTo('proxy')">
+          <div class="em">🌐</div><div class="cn">Прокси</div>
+          <div class="cs">${proxyCount>0?proxyCount+' шт. в наличии':'Уточняйте у менеджера'}</div>
+        </div>
+        <div class="cat-card" onclick="navTo('numbers')">
+          <div class="em">📱</div><div class="cn">Физические номера</div>
+          <div class="cs">${numberCount>0?numberCount+' шт. в наличии':'Уточняйте у менеджера'}</div>
+        </div>
+        <div class="cat-card" onclick="navTo('verif')">
+          <div class="em">✅</div><div class="cn">Верификации</div>
+          <div class="cs">Fragment · Binance · Bybit</div>
+        </div>
+        <div class="cat-card" onclick="navTo('discord')">
+          <div class="em">💬</div><div class="cn">Discord</div>
+          <div class="cs">${discordCount>0?discordCount+' шт. в наличии':'Уточняйте у менеджера'}</div>
+        </div>
+      </div>`);
+  },
+
+  proxy(){
+    setHdr('🌐 Купить прокси', S.ptype?'Выберите страну':'Выберите тип');
+    const pd    = STOCK?.proxy || {};
+    const avail = Object.keys(pd).filter(k=>pd[k]&&pd[k].length>0);
+    const list  = S.ptype ? (pd[S.ptype]||[]) : [];
+    r(`<div class="sec"><div class="sec-title">ВЕРСИЯ</div></div>
+      <div class="chips">
+        ${PTYPES.filter(t=>avail.includes(t.k)||S.ptype===t.k).map(t=>`
+          <div class="chip ${S.ptype===t.k?'on':''}" onclick="pickPtype('${t.k}')">${t.i} ${t.l}</div>`).join('')}
+        ${avail.length===0?'<div style="color:var(--sub);font-size:13px;padding:8px 0">Нет доступных типов</div>':''}
+      </div>
+      ${S.ptype?`
+        <div class="sec"><div class="sec-title">СТРАНА</div></div>
+        ${list.length?`<div class="list">${list.map(c=>`
+          <div class="li" onclick="pickCountry('${c.c}',${c.p})">
+            <div class="fl">${flag(c.c)}</div>
+            <div class="inf"><div class="nm">${c.c}</div><div class="sm">${c.n} шт. в наличии</div></div>
+            <div class="rhs"><div class="pr">${c.p.toFixed(2)}$</div><div class="st">/мес</div></div>
+          </div>`).join('')}</div>`:empty('😔','Нет в наличии')}`:''}`);
+  },
+
+  proxyPeriod(){
+    setHdr('🌐 Срок аренды',`${flag(S.country)} ${S.country}`);
+    const typeL = PTYPES.find(t=>t.k===S.ptype)?.l||'';
+    const total = +(S.price*MULT[S.days]*S.qty).toFixed(2);
+    const unit  = +(S.price*MULT[S.days]).toFixed(2);
+    r(`<div class="sec"><div class="sec-title">ТИП: ${typeL}</div></div>
+      <div class="sec"><div class="sec-title">ПЕРИОД</div></div>
+      <div class="pgrid">
+        ${PERIODS.map(p=>{const pr=(S.price*MULT[p.d]).toFixed(2);return`
+          <div class="pbtn ${S.days===p.d?'on':''}" onclick="pickDay(${p.d})">
+            <div class="pd">${p.l}</div><div class="pp">${pr}$</div>
+          </div>`}).join('')}
+      </div>
+      <div class="sec"><div class="sec-title">КОЛИЧЕСТВО</div></div>
+      <div class="qty-wrap">
+        <div class="qty-row">
+          <button class="qbtn" onclick="dq(-1)">−</button>
+          <input class="qinp" id="qi" type="number" value="${S.qty}" min="1" max="100" oninput="setQtyI(this.value)">
+          <button class="qbtn" onclick="dq(1)">+</button>
+        </div>
+        <div class="qpres">
+          ${[1,5,10,25,50,100].map(n=>`<div class="qp ${S.qty===n?'on':''}" onclick="setQty(${n})">${n}</div>`).join('')}
+        </div>
+      </div>
+      <div class="pbox">
+        <div class="prow"><span class="avail">✅ В наличии</span></div>
+        <div class="psep"></div>
+        <div class="prow"><span class="plbl">Цена</span><span class="ptot">${total.toFixed(2)} $</span></div>
+        <div class="prow"><span class="plbl">За одну</span><span class="pval">${unit.toFixed(2)} $</span></div>
+        <div class="prow"><span class="plbl">Количество</span><span class="pval">${S.qty} шт.</span></div>
+      </div>
+      <button class="buybtn" onclick="doProxy()">🛒 Перейти к оплате</button>
+      <div style="height:16px"></div>`);
+  },
+
+  numbers(){
+    setHdr('📱 Физические номера','Выберите страну');
+    const nums = STOCK?.numbers||[];
+    if(!nums.length){ r(empty('📱','Номеров пока нет\nЗагляните позже')); return; }
+    r(`<div class="sec"><div class="sec-title">СТРАНА</div></div>
+      <div class="list">
+        ${nums.map(n=>`
+          <div class="li" onclick="doNumber('${n.c}',${n.p})">
+            <div class="fl">${flag(n.c)}</div>
+            <div class="inf"><div class="nm">${n.c}</div><div class="sm">${n.n} шт. в наличии</div></div>
+            <div class="rhs"><div class="pr">${n.p.toFixed(2)}$</div></div>
+          </div>`).join('')}
+      </div>`);
+  },
+
+  verif(){
+    setHdr('✅ Верификации','Выберите сервис');
+    const verifs = STOCK?.verifs||[];
+    if(!verifs.length){ r(empty('✅','Нет доступных верификаций')); return; }
+    r(`<div class="sec"><div class="sec-title">ПЛАТФОРМЫ</div></div>
+      <div class="list">
+        ${verifs.map(v=>{const vi=VINFO[v.k]||{i:'✅',d:''};const vn=VNAMES[v.k]||v.k;return`
+          <div class="vcard" onclick="doVerif('${v.k}',${v.p})">
+            <div class="vic">${vi.i}</div>
+            <div class="vinfo"><div class="vn">${vn}</div><div class="vd">${vi.d}</div></div>
+            <div class="vpr">${v.p.toFixed(2)}$</div>
+          </div>`}).join('')}
+      </div>`);
+  },
+
+  discord(){
+    setHdr('💬 Discord','Аккаунты');
+    const accs = STOCK?.discord||[];
+    if(!accs.length){ r(empty('💬','Discord аккаунтов пока нет')); return; }
+    r(`<div class="sec"><div class="sec-title">АККАУНТЫ (${accs.length} шт.)</div></div>
+      <div class="list">
+        ${accs.map(a=>`
+          <div class="vcard" onclick="doDiscord(${a.id},${a.p})">
+            <div class="disc-ic">💬</div>
+            <div class="vinfo"><div class="vn">${a.desc}</div><div class="vd">Discord аккаунт</div></div>
+            <div class="vpr">${a.p.toFixed(2)}$</div>
+          </div>`).join('')}
+      </div>`);
+  },
+};
+
+// ════ ДЕЙСТВИЯ ═════════════════════════════════
+function pickPtype(k){ S.ptype=k; S.country=null; S.price=null; P.proxy(); }
+
+function pickCountry(c,p){
+  S.country=c; S.price=p;
+  S.stack.push(()=>P.proxy());
+  document.getElementById('backBtn').style.display='flex';
+  P.proxyPeriod();
+}
+
+function pickDay(d){ S.days=d; P.proxyPeriod(); }
+function dq(n){ S.qty=Math.max(1,Math.min(100,S.qty+n)); P.proxyPeriod(); }
+function setQty(n){ S.qty=n; P.proxyPeriod(); }
+function setQtyI(v){ const n=parseInt(v); if(!isNaN(n)&&n>0) S.qty=n; }
+
+function doProxy(){
+  if(!S.ptype||!S.country){ toast('Выберите тип и страну'); return; }
+  const total=+(S.price*MULT[S.days]*S.qty).toFixed(2);
+  tg.sendData(JSON.stringify({action:'buy_proxy',proxy_type:S.ptype,country:S.country,days:S.days,qty:S.qty,price:total}));
+  toast('✅ Заказ отправлен!');
+}
+function doNumber(c,p){ tg.sendData(JSON.stringify({action:'buy_number',country:c,price:p})); toast('Переходим к оплате...'); }
+function doVerif(k,p){ tg.sendData(JSON.stringify({action:'buy_verif',platform:k,price:p})); toast('Переходим к оплате...'); }
+function doDiscord(id,p){ tg.sendData(JSON.stringify({action:'buy_discord',id,price:p})); toast('Переходим к оплате...'); }
+
+let toastTimer;
+function toast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('on'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.classList.remove('on'),2200); }
+
+// ════ СТАРТ ════════════════════════════════════
+(async()=>{
+  r(`<div class="ldr"><div class="spin"></div>Загрузка...</div>`);
+  await loadStock();
+  P.home();
+})();
+</script>
+</body>
+</html>
